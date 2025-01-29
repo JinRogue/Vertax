@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  vertax:
+    build:
+      context: .
+    container_name: vertax_container
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: python examples/calculate_tax.py
