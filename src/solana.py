@@ -2,6 +2,8 @@ import requests
 import logging
 from utils.transaction_parser import parse_solana_tx, handle_irregular_tx
 
+logging.basicConfig(level=logging.INFO)
+
 def connect_to_solana_rpc(rpc_url):
     """
     Connects to the Solana RPC endpoint to check connectivity.
@@ -15,8 +17,10 @@ def connect_to_solana_rpc(rpc_url):
     try:
         response = requests.get(rpc_url)
         response.raise_for_status()
+        logging.info(f"Successfully connected to Solana RPC at {rpc_url}")
         return True
-    except requests.RequestException:
+    except requests.RequestException as e:
+        logging.error(f"Error connecting to Solana RPC at {rpc_url}: {e}")
         return False
 
 def parse_transaction_data(raw_data):
@@ -32,7 +36,11 @@ def parse_transaction_data(raw_data):
     parsed_data = []
     for tx in raw_data:
         try:
-            parsed_data.append(handle_irregular_tx(tx))
+            parsed_tx = handle_irregular_tx(tx)
+            if parsed_tx:
+                parsed_data.append(parsed_tx)
+            else:
+                logging.warning(f"Transaction {tx.get('signature', 'unknown')} could not be parsed.")
         except Exception as e:
-            logging.error(f"Failed to parse transaction: {e}")
+            logging.error(f"Failed to parse transaction {tx.get('signature', 'unknown')}: {e}")
     return parsed_data
