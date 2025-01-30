@@ -32,13 +32,12 @@ Fetch raw transaction data from the Solana blockchain.
 
 ### **💲 `utils/price_fetcher.py`**
 
-#### **📉 `fetch_historical_price(token_symbol, timestamp, price_api_url)`**
-Retrieve historical token prices for accurate calculations.
+#### **📉 `fetch_historical_price(token_symbol, timestamp)`**
+Retrieve historical token prices with caching and fallback mechanisms.
 
 - **Parameters:**
   - `token_symbol` (str): The symbol of the token (e.g., `SOL`).
   - `timestamp` (int): The Unix timestamp for which to fetch the price.
-  - `price_api_url` (str): URL of the price API endpoint.
 
 - **Returns:**
   - `float`: The historical price of the token.
@@ -47,7 +46,86 @@ Retrieve historical token prices for accurate calculations.
   ```python
   from utils.price_fetcher import fetch_historical_price
 
-  price = fetch_historical_price("SOL", 1672531200, "https://api.example.com/price")
+  price = fetch_historical_price("SOL", 1672531200)
+  print(price)
+  ```
+
+---
+
+### **📂 `utils/cache_manager.py`**
+
+#### **🗂️ `get_cached_price(timestamp, token)`**
+Retrieve cached price data if available.
+
+- **Parameters:**
+  - `timestamp` (int): The Unix timestamp for the price.
+  - `token` (str): The token symbol.
+
+- **Returns:**
+  - `float` or `None`: Cached price if found, otherwise `None`.
+
+- **Example:**
+  ```python
+  from utils.cache_manager import CacheManager
+
+  cache_manager = CacheManager()
+  cached_price = cache_manager.get_cached_price(1672531200, "SOL")
+  print(cached_price)
+  ```
+
+#### **🗃️ `store_price(timestamp, token, price)`**
+Store price data in the cache.
+
+- **Parameters:**
+  - `timestamp` (int): The Unix timestamp for the price.
+  - `token` (str): The token symbol.
+  - `price` (float): The price to store in the cache.
+
+- **Example:**
+  ```python
+  from utils.cache_manager import CacheManager
+
+  cache_manager = CacheManager()
+  cache_manager.store_price(1672531200, "SOL", 100.0)
+  ```
+
+---
+
+### **📂 `utils/price_providers.py`**
+
+#### **🛠️ `CoinGeckoProvider.fetch_price(token_symbol, date)`**
+Fetches price data from CoinGecko.
+
+- **Parameters:**
+  - `token_symbol` (str): The symbol of the token (e.g., `SOL`).
+  - `date` (str): Date in `YYYY-MM-DD` format.
+
+- **Returns:**
+  - `float`: Price of the token.
+
+- **Example:**
+  ```python
+  from utils.price_providers import CoinGeckoProvider
+
+  price = CoinGeckoProvider.fetch_price("SOL", "2023-01-01")
+  print(price)
+  ```
+
+#### **🛠️ `CoinMarketCapProvider.fetch_price(token_symbol, date)`**
+Fetches price data from CoinMarketCap.
+
+- **Parameters:**
+  - `token_symbol` (str): The symbol of the token (e.g., `SOL`).
+  - `date` (str): Date in `YYYY-MM-DD` format.
+
+- **Returns:**
+  - `float`: Price of the token.
+
+- **Example:**
+  ```python
+  from utils.price_providers import CoinMarketCapProvider
+
+  price = CoinMarketCapProvider.fetch_price("SOL", "2023-01-01")
   print(price)
   ```
 
@@ -131,3 +209,52 @@ Process a wallet to calculate total profit and taxes owed.
   print(summary)
   ```
 
+---
+
+### **📂 `utils/transaction_parser.py`**
+
+#### **🔍 `parse_solana_tx(raw_tx_data: dict)`**
+Parses a single Solana transaction and normalizes its data.
+
+- **Parameters:**
+  - `raw_tx_data` (dict): Raw transaction data from Solana.
+
+- **Returns:**
+  - `dict`: Normalized transaction details.
+
+- **Example:**
+  ```python
+  from utils.transaction_parser import parse_solana_tx
+
+  raw_tx = {
+      "signature": "abc123",
+      "instructions": ["instr1", "instr2"],
+      "blockTime": 1650000000,
+      "status": "success"
+  }
+  parsed_tx = parse_solana_tx(raw_tx)
+  print(parsed_tx)
+  ```
+
+#### **⚙️ `handle_irregular_tx(raw_tx_data: dict)`**
+Handles edge cases for complex Solana transactions.
+
+- **Parameters:**
+  - `raw_tx_data` (dict): Raw transaction data from Solana.
+
+- **Returns:**
+  - `dict`: Processed transaction details or fallback information.
+
+- **Example:**
+  ```python
+  from utils.transaction_parser import handle_irregular_tx
+
+  raw_tx = {
+      "signature": "def456",
+      "instructions": ["instr1", "instr2"],
+      "blockTime": 1650003600,
+      "partialFill": True
+  }
+  processed_tx = handle_irregular_tx(raw_tx)
+  print(processed_tx)
+  ```

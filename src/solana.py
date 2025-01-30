@@ -1,5 +1,6 @@
-# src/solana.py
 import requests
+import logging
+from utils.transaction_parser import parse_solana_tx, handle_irregular_tx
 
 def connect_to_solana_rpc(rpc_url):
     """
@@ -20,7 +21,7 @@ def connect_to_solana_rpc(rpc_url):
 
 def parse_transaction_data(raw_data):
     """
-    Parses raw transaction data into a standardized format.
+    Parses raw transaction data using the transaction parser module.
 
     Args:
         raw_data (list): Raw transaction data fetched from Solana.
@@ -30,11 +31,8 @@ def parse_transaction_data(raw_data):
     """
     parsed_data = []
     for tx in raw_data:
-        parsed_data.append({
-            "signature": tx.get("signature"),
-            "purchase_time": tx.get("blockTime"),
-            "sell_time": tx.get("blockTime") + 3600,  # Example: Sell time 1 hour later
-            "token_symbol": "SOL",  # Example: Assume all transactions involve SOL
-            "amount": 1.0  # Example: Assume 1 token traded per transaction
-        })
+        try:
+            parsed_data.append(handle_irregular_tx(tx))
+        except Exception as e:
+            logging.error(f"Failed to parse transaction: {e}")
     return parsed_data
