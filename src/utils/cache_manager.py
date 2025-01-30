@@ -1,3 +1,4 @@
+import logging
 class CacheManager:
     """
     Handles caching of price data to reduce API calls.
@@ -16,7 +17,14 @@ class CacheManager:
         Returns:
             float or None: Cached price if found, None otherwise.
         """
-        return self.cache.get((timestamp, token))
+        try:
+            cached_price = self.cache.get((timestamp, token))
+            if cached_price is not None:
+                logging.info(f"Cache hit: {token} at {timestamp} => {cached_price}")
+            return cached_price
+        except Exception as e:
+            logging.error(f"Error retrieving cached price: {e}")
+            return None
 
     def store_price(self, timestamp, token, price):
         """
@@ -27,4 +35,8 @@ class CacheManager:
             token (str): The token symbol.
             price (float): The price to cache.
         """
-        self.cache[(timestamp, token)] = price
+        try:
+            self.cache[(timestamp, token)] = price
+            logging.info(f"Stored price for {token} at {timestamp} => {price}")
+        except Exception as e:
+            logging.error(f"Error storing price in cache: {e}")
