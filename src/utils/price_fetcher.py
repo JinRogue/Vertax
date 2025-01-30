@@ -1,21 +1,33 @@
-import requests
 from datetime import datetime
+import logging
+from src.utils.cache_manager import CacheManager
+from src.utils.price_provider import CoinGeckoProvider, CoinMarketCapProvider
 
-def fetch_historical_price(token_symbol, timestamp, price_api_url):
+cache_manager = CacheManager()
+
+
+def fetch_historical_price(token_symbol, timestamp):
     """
-    Retrieves historical token prices for accurate profit/loss calculations.
+    Retrieves historical token prices with caching and fallback providers.
 
     Args:
-        token_symbol (str): Symbol of the token (e.g., SOL).
+        token_symbol (str): The token symbol (e.g., SOL).
         timestamp (int): Unix timestamp to get the price for.
-        price_api_url (str): API endpoint for price data.
 
     Returns:
         float: Historical price of the token.
     """
+    cached_price = cache_manager.get_cached_price(timestamp, token_symbol)
+    if cached_price is not None:
+        return cached_price
+
     date = datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d')
-    url = f"{price_api_url}?symbol={token_symbol}&date={date}"
-    response = requests.get(url)
-    response.raise_for_status()
-    data = response.json()
-    return data.get("price", 0.0)
+
+    try:
+        price = CoinGeckoProvider.fetch_price(token_symbol, date)
+    except Exception as e:
+        logging.warning(f"CoinGecko failed: {e}, trying CoinMarketCap.")
+        price = CoinMarketCapProvider.fetch_price(token_symbol, date)
+
+    cache_manager.store_price(timestamp, token_symbol, price)
+    return price
