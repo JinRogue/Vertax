@@ -16,10 +16,10 @@ def connect_to_solana_rpc(rpc_url):
     """
     try:
         response = requests.get(rpc_url)
-        response.raise_for_status()
+        response.raise_for_status()  
         logging.info(f"Successfully connected to Solana RPC at {rpc_url}")
         return True
-    except requests.RequestException as e:
+    except requests.exceptions.RequestException as e:
         logging.error(f"Error connecting to Solana RPC at {rpc_url}: {e}")
         return False
 
@@ -35,12 +35,15 @@ def parse_transaction_data(raw_data):
     """
     parsed_data = []
     for tx in raw_data:
+        tx_signature = tx.get('signature', 'unknown')
         try:
             parsed_tx = handle_irregular_tx(tx)
             if parsed_tx:
                 parsed_data.append(parsed_tx)
             else:
-                logging.warning(f"Transaction {tx.get('signature', 'unknown')} could not be parsed.")
+                logging.warning(f"Transaction {tx_signature} could not be parsed due to irregularities.")
+        except KeyError as e:
+            logging.error(f"Missing expected data field in transaction {tx_signature}: {e}")
         except Exception as e:
-            logging.error(f"Failed to parse transaction {tx.get('signature', 'unknown')}: {e}")
+            logging.error(f"Failed to parse transaction {tx_signature}: {e}")
     return parsed_data
