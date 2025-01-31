@@ -1,10 +1,13 @@
 import logging
+from collections import defaultdict
+
 class CacheManager:
     """
     Handles caching of price data to reduce API calls.
     """
     def __init__(self):
-        self.cache = {}
+        # Use defaultdict to simplify checking for missing data
+        self.cache = defaultdict(dict)
 
     def get_cached_price(self, timestamp, token):
         """
@@ -18,12 +21,14 @@ class CacheManager:
             float or None: Cached price if found, None otherwise.
         """
         try:
-            cached_price = self.cache.get((timestamp, token))
+            cached_price = self.cache[token].get(timestamp)
             if cached_price is not None:
                 logging.info(f"Cache hit: {token} at {timestamp} => {cached_price}")
+            else:
+                logging.info(f"Cache miss: {token} at {timestamp}")
             return cached_price
-        except Exception as e:
-            logging.error(f"Error retrieving cached price: {e}")
+        except KeyError as e:
+            logging.error(f"Error retrieving cached price for token {token} at {timestamp}: {e}")
             return None
 
     def store_price(self, timestamp, token, price):
@@ -36,7 +41,7 @@ class CacheManager:
             price (float): The price to cache.
         """
         try:
-            self.cache[(timestamp, token)] = price
+            self.cache[token][timestamp] = price
             logging.info(f"Stored price for {token} at {timestamp} => {price}")
         except Exception as e:
-            logging.error(f"Error storing price in cache: {e}")
+            logging.error(f"Error storing price for {token} at {timestamp}: {e}")
