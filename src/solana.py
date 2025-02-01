@@ -37,7 +37,7 @@ def parse_transaction_data(raw_data):
     for tx in raw_data:
         tx_signature = tx.get('signature', 'unknown')
         try:
-            parsed_tx = handle_irregular_tx(tx)
+            parsed_tx = parse_solana_tx(tx)
             if parsed_tx:
                 parsed_data.append(parsed_tx)
             else:
