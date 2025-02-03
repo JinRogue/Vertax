@@ -4,6 +4,11 @@
 
 The **Vertax SDK** is an open-source Python toolkit developed to facilitate efficient and local cryptocurrency tax computations. It allows developers to parse Solana blockchain transactions, calculate trading profits, and apply appropriate tax rules based on holding durations. This lightweight framework is designed for flexibility and privacy, empowering users to perform all computations locally.
 
+### **Enhanced Features**
+- **Improved Solana Transaction Parsing**: Handles complex transactions, including partial fills and multi-instruction trades, with better error handling and fallback mechanisms.
+- **Integrated Tax Rule Engine**: Automatically classifies transactions based on short-term and long-term holding periods and applies the correct tax calculations.
+- **Privacy-Focused Data Handling**: Ensures that all transaction data is processed locally with no external storage or transmission, maintaining user privacy and security.
+
 ---
 
 ## **Table of Contents**
@@ -31,15 +36,21 @@ The **Vertax SDK** is an open-source Python toolkit developed to facilitate effi
 
 - **🔗 Transaction Parsing**:
   - Efficiently fetches and structures Solana transaction data.
+  - Handles complex transactions, including partial fills and multi-instruction trades.
 
 - **💰 Tax Computation**:
   - Supports short-term and long-term capital gains calculations based on customizable tax rates.
+  - Integrates an automated tax rule engine for proper classification and tax application.
 
 - **📈 Price History Integration**:
   - Retrieves historical token prices for accurate profit and loss analysis.
 
 - **🛠️ Modular Design**:
   - Suitable for standalone use or integration into larger projects.
+
+- **🔒 Privacy-First Approach**:
+  - Ensures all transaction data is processed locally without external storage or transmission.
+  - Provides secure handling of sensitive financial information.
 
 ---
 
@@ -128,7 +139,7 @@ print(summary)
 
 ## ⚙️ **Configuration**
 
-Adjust settings in `config.py` or via environment variables:
+Adjust settings in config.py or via environment variables:
 
 - **🔗 RPC Endpoint**: Set the Solana RPC URL.
 - **💹 API for Prices**: Define your historical price API URL.
@@ -162,5 +173,4 @@ The Vertax SDK provides a streamlined approach to managing cryptocurrency tax ca
 
 ## **API Reference**
 Detailed API documentation is available [here](docs/API_REFERENCE.md).
-
 
