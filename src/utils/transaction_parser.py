@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 from src.utils.tax_rules import calculate_holding_period, apply_tax_rule
+from src.utils.privacy import sanitize_transaction_data
 
 # Set up logging configuration
 logging.basicConfig(level=logging.INFO)
@@ -18,11 +19,14 @@ def parse_solana_tx(raw_tx_data, purchase_date):
         dict: Normalized transaction details with tax liability.
     """
     try:
+        # Sanitize transaction data before processing
+        sanitized_tx_data = sanitize_transaction_data(raw_tx_data)
+
         # Ensure the presence of expected keys
-        signature = raw_tx_data.get("signature")
-        instructions = raw_tx_data.get("instructions", [])
-        block_time = raw_tx_data.get("blockTime")
-        status = raw_tx_data.get("status", "unknown")
+        signature = sanitized_tx_data.get("signature")
+        instructions = sanitized_tx_data.get("instructions", [])
+        block_time = sanitized_tx_data.get("blockTime")
+        status = sanitized_tx_data.get("status", "unknown")
 
         if not signature:
             logging.warning("Transaction missing 'signature'.")
@@ -41,7 +45,7 @@ def parse_solana_tx(raw_tx_data, purchase_date):
         holding_period = calculate_holding_period(purchase_date, transaction_date)
 
         # Assuming a fixed profit for now (this could be extended to fetch from transaction data)
-        profit = raw_tx_data.get("profit", 0.0)  # Example, you may need to extract profit differently
+        profit = sanitized_tx_data.get("profit", 0.0)  # Example, you may need to extract profit differently
 
         # Apply tax rule based on holding period
         short_term_rate = 0.20  # Example rate for short-term tax
@@ -64,7 +68,6 @@ def parse_solana_tx(raw_tx_data, purchase_date):
     except Exception as e:
         logging.error(f"Error parsing transaction: {e}")
         return {}
-
 
 def handle_irregular_tx(raw_tx_data):
     """
