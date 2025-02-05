@@ -8,6 +8,7 @@ The **Vertax SDK** is an open-source Python toolkit developed to facilitate effi
 - **Improved Solana Transaction Parsing**: Handles complex transactions, including partial fills and multi-instruction trades, with better error handling and fallback mechanisms.
 - **Integrated Tax Rule Engine**: Automatically classifies transactions based on short-term and long-term holding periods and applies the correct tax calculations.
 - **Privacy-Focused Data Handling**: Ensures that all transaction data is processed locally with no external storage or transmission, maintaining user privacy and security.
+- **Secure Transaction Processing**: Includes sanitization and encryption of sensitive transaction data to prevent leaks and unauthorized access.
 
 ---
 
@@ -29,6 +30,7 @@ The **Vertax SDK** is an open-source Python toolkit developed to facilitate effi
 
 - **📊 Accuracy**: Ensure your tax rates and blockchain data sources align with regional laws.
 - **🔒 Data Security**: All computations are performed locally, safeguarding sensitive wallet and transaction data.
+- **🛡 Secure Data Handling**: Uses `privacy.py` for sanitization and encryption to ensure no sensitive transaction data is stored or transmitted externally.
 
 ---
 
@@ -37,6 +39,7 @@ The **Vertax SDK** is an open-source Python toolkit developed to facilitate effi
 - **🔗 Transaction Parsing**:
   - Efficiently fetches and structures Solana transaction data.
   - Handles complex transactions, including partial fills and multi-instruction trades.
+  - Ensures all sensitive data is sanitized before processing.
 
 - **💰 Tax Computation**:
   - Supports short-term and long-term capital gains calculations based on customizable tax rates.
@@ -50,7 +53,8 @@ The **Vertax SDK** is an open-source Python toolkit developed to facilitate effi
 
 - **🔒 Privacy-First Approach**:
   - Ensures all transaction data is processed locally without external storage or transmission.
-  - Provides secure handling of sensitive financial information.
+  - Uses `sanitize_transaction_data()` to remove sensitive fields before external processing.
+  - Encrypts sensitive fields with `encrypt_sensitive_data()` for temporary storage security.
 
 ---
 
@@ -88,15 +92,24 @@ The **Vertax SDK** is an open-source Python toolkit developed to facilitate effi
 
 ## 📚 **Usage Examples**
 
-### **Fetching Transactions**
+### **Processing Transactions Securely**
 
-Fetch raw transaction data and process it for analysis:
+Before parsing transactions, ensure data is sanitized and encrypted:
 
 ```python
-from utils.data_fetcher import fetch_transactions
+from utils.privacy import sanitize_transaction_data, encrypt_sensitive_data
 
-transactions = fetch_transactions("YourWalletAddress", "https://api.mainnet-beta.solana.com")
-print(transactions)
+transaction = {
+    "user_id": "12345",
+    "wallet_address": "your_wallet_address",
+    "private_key": "your_private_key",
+    "amount": 1000,
+}
+
+sanitized_transaction = sanitize_transaction_data(transaction)
+encrypted_transaction = encrypt_sensitive_data(transaction)
+print(sanitized_transaction)
+print(encrypted_transaction)
 ```
 
 ### **Calculating Taxes**
@@ -139,11 +152,12 @@ print(summary)
 
 ## ⚙️ **Configuration**
 
-Adjust settings in config.py or via environment variables:
+Adjust settings in `config.py` or via environment variables:
 
 - **🔗 RPC Endpoint**: Set the Solana RPC URL.
 - **💹 API for Prices**: Define your historical price API URL.
 - **💵 Tax Rates**: Modify short- and long-term rates according to your needs.
+- **🔒 Privacy Settings**: Enable or disable data sanitization and encryption in `privacy.py`.
 
 ---
 
